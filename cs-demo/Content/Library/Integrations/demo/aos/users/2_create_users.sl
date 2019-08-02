@@ -1,6 +1,6 @@
 namespace: Integrations.demo.aos.users
 flow:
-  name: create_users
+  name: 2_create_users
   inputs:
     - file_host: itom1.hcm.demo.local
     - file_user: root
