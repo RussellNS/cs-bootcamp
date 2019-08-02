@@ -1,4 +1,18 @@
 namespace: Integrations.demo.aos.users
-flow:
+operation:
   name: parse_credentials
-  results: []
+  inputs:
+    - credentials
+    - delimiter:
+        required: false
+        default: =
+  python_action:
+    script: |-
+      array = credentials.split(delimiter);
+      name = array[0];
+      password = array[1];
+  outputs:
+    - name
+    - password
+  results:
+    - SUCCESS
