@@ -7,7 +7,7 @@ flow:
     - file_password:
         default: S0lutions2016
         sensitive: true
-    - file_path: /tmp/users.txt
+    - credentials: petr=cloud
     - db_host: 10.0.46.43
     - db_user: postgres
     - db_password:
@@ -38,22 +38,11 @@ flow:
                 value: '${file_password}'
                 sensitive: true
             - text: '${created_password}'
-        publish: []
+        publish:
+          - password_sha1: '${sha1}'
         navigate:
           - FAILURE: on_failure
           - SUCCESS: calculate_sha1_1
-    - calculate_sha1_1:
-        do:
-          Integrations.demo.aos.users.calculate_sha1:
-            - host: '${file_host}'
-            - user: '${file_user}'
-            - password:
-                value: '${file_password}'
-                sensitive: true
-            - text: '${created_name[::-1]+password_sha1}'
-        navigate:
-          - FAILURE: on_failure
-          - SUCCESS: random_number_generator
     - random_number_generator:
         do:
           io.cloudslang.base.math.random_number_generator:
@@ -79,6 +68,20 @@ flow:
         navigate:
           - SUCCESS: SUCCESS
           - FAILURE: on_failure
+    - calculate_sha1_1:
+        do:
+          Integrations.demo.aos.users.calculate_sha1:
+            - host: '${file_host}'
+            - user: '${file_user}'
+            - password:
+                value: '${file_password}'
+                sensitive: true
+            - text: '${created_name[::-1]+password_sha1}'
+        publish:
+          - username_password_sha1: '${sha1}'
+        navigate:
+          - FAILURE: on_failure
+          - SUCCESS: random_number_generator
   results:
     - SUCCESS
     - FAILURE
@@ -91,12 +94,6 @@ extensions:
       calculate_sha1:
         x: 529
         'y': 109
-      calculate_sha1_1:
-        x: 704
-        'y': 110
-      random_number_generator:
-        x: 703
-        'y': 352
       sql_command:
         x: 517
         'y': 364
@@ -104,6 +101,12 @@ extensions:
           2bea5d9b-72bb-bf73-cf4e-1c69d67e3478:
             targetId: 4d037aba-219c-1752-b566-8acccdde13eb
             port: SUCCESS
+      random_number_generator:
+        x: 703
+        'y': 352
+      calculate_sha1_1:
+        x: 705
+        'y': 120
     results:
       SUCCESS:
         4d037aba-219c-1752-b566-8acccdde13eb:

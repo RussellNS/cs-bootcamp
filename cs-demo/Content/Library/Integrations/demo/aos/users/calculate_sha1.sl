@@ -14,6 +14,9 @@ flow:
             - host: '${host}'
             - command: "${\"echo -n '\"+text+\"' | sha1sum | awk '{print $1}'\"}"
             - username: '${user}'
+            - password:
+                value: '${password}'
+                sensitive: true
         publish:
           - sha1: '${return_result.strip()}'
         navigate:
