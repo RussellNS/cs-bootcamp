@@ -10,4 +10,13 @@ flow:
     - mm_url: 'https://mattermost.hcm.demo.local'
     - mm_user: admin
     - mm_chanel_id: eeujbpz9ufbc8rxcyj9qhcgq3a
+    - file_password:
+        default: S0lutions2016
+        sensitive: true
+    - db_password:
+        default: admin
+        sensitive: true
+    - mm_password:
+        default: Cloud_123
+        sensitive: true
   results: []
