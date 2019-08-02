@@ -17,35 +17,92 @@ flow:
         sensitive: true
     - mm_channel_id
   workflow:
-    - read_users:
+    - parse_credentials:
         do:
-          io.cloudslang.base.ssh.ssh_command:
+          Integrations.demo.aos.users.parse_credentials:
+            - credentials: '${credentials}'
+        publish:
+          - created_name: '${name}'
+          - created_password: '${password}'
+        navigate:
+          - SUCCESS: calculate_sha1
+    - calculate_sha1:
+        do:
+          Integrations.demo.aos.users.calculate_sha1:
             - host: '${file_host}'
-            - command: "${'cat '+file_path}"
-            - username: '${file_user}'
+            - user: '${file_user}'
             - password:
                 value: '${file_password}'
                 sensitive: true
+            - text: '${created_password}'
+        publish: []
+        navigate:
+          - FAILURE: on_failure
+          - SUCCESS: calculate_sha1_1
+    - calculate_sha1_1:
+        do:
+          Integrations.demo.aos.users.calculate_sha1:
+            - host: '${file_host}'
+            - user: '${file_user}'
+            - password:
+                value: '${file_password}'
+                sensitive: true
+            - text: '${created_name[::-1]+password_sha1}'
+        navigate:
+          - FAILURE: on_failure
+          - SUCCESS: random_number_generator
+    - random_number_generator:
+        do:
+          io.cloudslang.base.math.random_number_generator:
+            - min: '100000000'
+            - max: '1000000000'
         publish:
-          - file_content: '${return_result}'
+          - user_id: '${random_number}'
+        navigate:
+          - SUCCESS: sql_command
+          - FAILURE: on_failure
+    - sql_command:
+        do:
+          io.cloudslang.base.database.sql_command:
+            - db_server_name: '${db_host}'
+            - db_type: PostgreSQL
+            - username: '${db_user}'
+            - password:
+                value: '${db_password}'
+                sensitive: true
+            - database_name: adv_account
+            - command: "${\"INSERT INTO account (user_id, user_type, active, agree_to_receive_offers, defaultpaymentmethodid, email, internallastsuccesssullogin, internalunsuccessfulloginattempts, internaluserblockedfromloginuntil, login_name, password, country_id) VALUES (\"+user_id+\", 20, 'Y', true, 0, 'someone@microfocus.com', 0, 0, 0, '\"+created_name+\"', '\"+username_password_sha1+\"', 210);\"}"
+            - trust_all_roots: 'true'
         navigate:
           - SUCCESS: SUCCESS
           - FAILURE: on_failure
   results:
-    - FAILURE
     - SUCCESS
+    - FAILURE
 extensions:
   graph:
     steps:
-      read_users:
-        x: 120
-        'y': 170
+      parse_credentials:
+        x: 321
+        'y': 110
+      calculate_sha1:
+        x: 529
+        'y': 109
+      calculate_sha1_1:
+        x: 704
+        'y': 110
+      random_number_generator:
+        x: 703
+        'y': 352
+      sql_command:
+        x: 517
+        'y': 364
         navigate:
-          01968009-e738-53dd-3a3d-c74b8b09b221:
+          2bea5d9b-72bb-bf73-cf4e-1c69d67e3478:
             targetId: 4d037aba-219c-1752-b566-8acccdde13eb
             port: SUCCESS
     results:
       SUCCESS:
         4d037aba-219c-1752-b566-8acccdde13eb:
-          x: 343
-          'y': 173
+          x: 331
+          'y': 360

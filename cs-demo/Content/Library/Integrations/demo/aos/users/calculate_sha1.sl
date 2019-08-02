@@ -15,10 +15,12 @@ flow:
             - command: "${\"echo -n '\"+text+\"' | sha1sum | awk '{print $1}'\"}"
             - username: '${user}'
         publish:
-          - sha1: '${return_result}'
+          - sha1: '${return_result.strip()}'
         navigate:
           - SUCCESS: SUCCESS
           - FAILURE: on_failure
+  outputs:
+    - sha1: '${sha1}'
   results:
     - FAILURE
     - SUCCESS
